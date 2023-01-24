@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Views/now_playing.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -27,22 +29,26 @@ class _NowPlayingSheetState extends ConsumerState<NowPlayingSheet> {
       isThreeLine: true,
       tileColor: Theme.of(context).colorScheme.secondaryContainer,
       leading: songMetadata.artwork != null
-          ? Image.memory(songMetadata.artwork!)
+          ? Image.memory(
+              songMetadata.artwork! as Uint8List,
+              fit: BoxFit.fill,
+            )
           : const Icon(Icons.music_note),
       title: Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
         child: Text(
-          songMetadata.filePath?.split("/").last ?? "Text",
-          maxLines: 2,
+          songMetadata.title!,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      minVerticalPadding: 10,
+      minVerticalPadding: 20,
+      visualDensity: VisualDensity.comfortable,
       subtitle: StreamBuilder<Duration>(
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return LinearProgressIndicator(
-              value: ((snapshot.data?.inMilliseconds ?? 1) /
+              value: ((snapshot.data?.inMilliseconds ?? 0) /
                       (player.duration?.inMilliseconds ?? 1))
                   .clamp(0, 1),
               color: Theme.of(context).colorScheme.primary,

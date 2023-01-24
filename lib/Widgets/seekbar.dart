@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/providers/player_provider.dart';
 
 class Seekbar extends ConsumerStatefulWidget {
