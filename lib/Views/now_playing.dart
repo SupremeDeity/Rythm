@@ -54,7 +54,7 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(
-              flex: 2,
+              flex: 3,
             ),
             song.artwork != null
                 ? SizedBox(
@@ -65,14 +65,17 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
                     ),
                   )
                 : const Icon(Icons.library_music, size: 150),
-            const Spacer(flex: 2),
+            const Spacer(flex: 1),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                song.filePath?.split("/").last.split(".").first ?? "",
+                song.title ??
+                    song.filePath?.split("/").last.split(".").first ??
+                    "",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
+                    fontSize: 18,
                     color: Theme.of(context).colorScheme.primary),
               ),
             ),
@@ -85,7 +88,7 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
                             player.seekToPrevious();
                           }
                         : null,
-                    icon: FaIcon(FontAwesomeIcons.backwardStep)),
+                    icon: const FaIcon(FontAwesomeIcons.backwardStep)),
                 IconButton(
                     onPressed: () {
                       if (player.playing) {

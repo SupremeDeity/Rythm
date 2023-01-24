@@ -3,6 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
 class Song {
+  String? title;
+  String? lyrics;
   String? filePath;
   Uint8List? artwork;
 }

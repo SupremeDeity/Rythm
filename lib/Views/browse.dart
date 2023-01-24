@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rythm/providers/local_folder_provider.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -19,12 +21,9 @@ class Browse extends ConsumerStatefulWidget {
 
 class _BrowseState extends ConsumerState<Browse> {
   String? currentPath;
-  var listView = [];
-  var loaded = false;
   final tagger = Audiotagger();
   @override
   void initState() {
-    generateView();
     super.initState();
   }
 
@@ -38,51 +37,28 @@ class _BrowseState extends ConsumerState<Browse> {
     );
   }
 
-  readArtwork(var filePath) async {}
-
   ListTile MusicView(File fileEntity, {Uint8List? artwork}) {
     return ListTile(
       leading: artwork == null
           ? const FaIcon(FontAwesomeIcons.music)
           : Image.memory(
               artwork,
-              width: 126,
-              height: 126,
+              width: 64,
+              height: 64,
+              fit: BoxFit.contain,
             ),
       title: Text(fileEntity.path.split("/").last),
-      onTap: () => playMusic(fileEntity.path),
+      onTap: () => playMusic(fileEntity.path, artwork),
     );
   }
 
-  playMusic(var path) async {
-    AudioPlayer player = ref.read(playerProvider);
-    Uint8List? artwork = await tagger.readArtwork(path: path);
-    //  var test= await tagger.readAudioFile(path: path);
-    //  test.
-    ref.read(songProvider.notifier).setSong(Song()
-      ..filePath = path
-      ..artwork = artwork);
-    await player.setFilePath(path);
-
-    player.play();
-  }
-
-  // Navigate
-  changeView({String? path}) {
-    setState(() {
-      currentPath = path;
-      listView.clear();
-    });
-
-    generateView();
-  }
-
-  generateView() async {
+  Stream<List<ListTile>> generateTiles() async* {
+    List<ListTile> listViews = <ListTile>[];
     var localFolderPath = ref.read(localFolderProvider);
     currentPath ??= localFolderPath;
     if (currentPath != localFolderPath) {
-      listView.add(ListTile(
-        title: const Text("../"),
+      listViews.add(ListTile(
+        title: const Text("Back"),
         leading: const Icon(Icons.subdirectory_arrow_left_sharp),
         onTap: () {
           Directory d = Directory(currentPath!);
@@ -94,21 +70,56 @@ class _BrowseState extends ConsumerState<Browse> {
     var allowedExtensions = ["mp3"];
 
     // Use a Streambuilder for this
-    await for (var entity in dir.list()) {
+    await for (var entity in dir.list(followLinks: false)) {
       if (entity is File) {
         var ext = entity.path.split("/").last.split(".").last;
         if (allowedExtensions.contains(ext)) {
-          listView.add(MusicView(
-            entity,
-          ));
+          Uint8List? artwork = await tagger.readArtwork(path: entity.path);
+          listViews.add(MusicView(entity, artwork: artwork));
         }
       } else if (entity is Directory &&
           !entity.path.split("/").last.startsWith(".")) {
-        listView.add(FolderView(entity));
+        listViews.add(FolderView(entity));
       }
+      yield listViews;
     }
+  }
+
+  playMusic(var path, Uint8List? artwork) async {
+    AudioPlayer player = ref.read(playerProvider);
+
+    var tags = await tagger.readTags(path: path);
+    var songTitle = tags?.title != null && tags?.title != ""
+        ? tags?.title
+        : path?.split("/").last.split(".").first;
+
+    ref.read(songProvider.notifier).setSong(
+          Song()
+            ..title = songTitle
+            ..lyrics = tags?.lyrics
+            ..filePath = path
+            ..artwork = artwork,
+        );
+    var artworkTempPath = "${(await getTemporaryDirectory()).path}/temp";
+    File? artworkTemp = artwork != null
+        ? await File(artworkTempPath).writeAsBytes(artwork)
+        : null;
+    player.setAudioSource(AudioSource.uri(
+      Uri.file(path),
+      tag: MediaItem(
+        id: '1',
+        title: songTitle,
+        artUri: artworkTemp?.uri,
+      ),
+    ));
+
+    player.play();
+  }
+
+  // Navigate
+  changeView({String? path}) {
     setState(() {
-      loaded = true;
+      currentPath = path;
     });
   }
 
@@ -126,14 +137,34 @@ class _BrowseState extends ConsumerState<Browse> {
           }
           return Future.value(true);
         },
-        child: loaded
-            ? ListView.builder(
-                itemCount: listView.length,
-                itemBuilder: (context, index) => listView[index],
-              )
-            : const Center(
-                child: CircularProgressIndicator(),
-              ),
+        child: StreamBuilder<List<ListTile>>(
+          stream: generateTiles(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                case ConnectionState.waiting:
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                case ConnectionState.active:
+                  return ListView.builder(
+                    itemBuilder: (context, index) => snapshot.data![index],
+                    itemCount: snapshot.data?.length ?? 0,
+                  );
+                case ConnectionState.done:
+                  return ListView.builder(
+                    itemBuilder: (context, index) => snapshot.data![index],
+                    itemCount: snapshot.data?.length ?? 0,
+                  );
+              }
+            }
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+          initialData: [],
+        ),
       ),
     );
   }

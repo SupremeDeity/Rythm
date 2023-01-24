@@ -27,17 +27,21 @@ class _NowPlayingSheetState extends ConsumerState<NowPlayingSheet> {
       isThreeLine: true,
       tileColor: Theme.of(context).colorScheme.secondaryContainer,
       leading: songMetadata.artwork != null
-          ? Image.memory(songMetadata.artwork!)
+          ? Image.memory(
+              songMetadata.artwork!,
+              fit: BoxFit.fill,
+            )
           : const Icon(Icons.music_note),
       title: Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
         child: Text(
-          songMetadata.filePath?.split("/").last ?? "Text",
-          maxLines: 2,
+          songMetadata.title!,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      minVerticalPadding: 10,
+      minVerticalPadding: 20,
+      visualDensity: VisualDensity.comfortable,
       subtitle: StreamBuilder<Duration>(
         builder: (context, snapshot) {
           if (snapshot.hasData) {

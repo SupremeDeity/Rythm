@@ -2,16 +2,16 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rythm/Views/permission_request.dart';
 import 'package:rythm/main_view.dart';
 import 'package:rythm/providers/local_folder_provider.dart';
 
 Future<void> main() async {
-  // await JustAudioBackground.init(
-  //   androidNotificationChannelId: 'supremedeity.rythm',
-  //   androidNotificationChannelName: 'Audio playback',
-  //   androidNotificationOngoing: true,
-  // );
+  await JustAudioBackground.init(
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   await Hive.initFlutter();
   // ignore: prefer_const_constructors
   runApp(ProviderScope(child: Rythm()));
