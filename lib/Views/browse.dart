@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/providers/local_folder_provider.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -15,6 +16,7 @@ class Browse extends ConsumerStatefulWidget {
   const Browse({
     Key? key,
   }) : super(key: key);
+
   @override
   _BrowseState createState() => _BrowseState();
 }
@@ -22,6 +24,7 @@ class Browse extends ConsumerStatefulWidget {
 class _BrowseState extends ConsumerState<Browse> {
   String? currentPath;
   final tagger = Audiotagger();
+
   @override
   void initState() {
     super.initState();
@@ -87,6 +90,10 @@ class _BrowseState extends ConsumerState<Browse> {
 
   playMusic(var path, Uint8List? artwork) async {
     AudioPlayer player = ref.read(playerProvider);
+    var artworkTempFolder = File("${(await getTemporaryDirectory()).path}");
+    if (await artworkTempFolder.exists()) {
+      await artworkTempFolder.delete();
+    }
 
     var tags = await tagger.readTags(path: path);
     var songTitle = tags?.title != null && tags?.title != ""
@@ -100,19 +107,19 @@ class _BrowseState extends ConsumerState<Browse> {
             ..filePath = path
             ..artwork = artwork,
         );
-    var artworkTempPath = "${(await getTemporaryDirectory()).path}/temp";
     File? artworkTemp = artwork != null
-        ? await File(artworkTempPath).writeAsBytes(artwork)
+        ? await File(
+                "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
+            .writeAsBytes(artwork, flush: true)
         : null;
     player.setAudioSource(AudioSource.uri(
       Uri.file(path),
       tag: MediaItem(
-        id: '1',
+        id: path,
         title: songTitle,
         artUri: artworkTemp?.uri,
       ),
     ));
-
     player.play();
   }
 
@@ -121,6 +128,24 @@ class _BrowseState extends ConsumerState<Browse> {
     setState(() {
       currentPath = path;
     });
+  }
+
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      title: const Text("Browse Local"),
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          onPressed: () {
+            changeView(path: currentPath);
+          },
+          icon: const FaIcon(
+            FontAwesomeIcons.arrowsRotate,
+            size: 20,
+          ),
+        )
+      ],
+    );
   }
 
   @override
@@ -144,7 +169,7 @@ class _BrowseState extends ConsumerState<Browse> {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
                 case ConnectionState.waiting:
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 case ConnectionState.active:
@@ -159,31 +184,13 @@ class _BrowseState extends ConsumerState<Browse> {
                   );
               }
             }
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           },
           initialData: [],
         ),
       ),
-    );
-  }
-
-  AppBar appBar(BuildContext context) {
-    return AppBar(
-      title: const Text("Browse Local"),
-      automaticallyImplyLeading: false,
-      actions: [
-        IconButton(
-          onPressed: () {
-            changeView(path: currentPath);
-          },
-          icon: const FaIcon(
-            FontAwesomeIcons.arrowsRotate,
-            size: 20,
-          ),
-        )
-      ],
     );
   }
 }

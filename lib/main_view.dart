@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Views/browse.dart';
+import 'package:rythm/Views/playlists_view.dart';
 import 'package:rythm/Widgets/now_playing_sheet.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -14,13 +16,15 @@ class MainView extends ConsumerStatefulWidget {
 }
 
 class _MainViewState extends ConsumerState<MainView> {
-  var _currentIndex = 0;
   bool playing = false;
-  var routes = const [
+  var routes = [
     Browse(),
-    Browse(),
+    PlaylistBrowse(null),
     Browse(),
   ];
+
+  var _currentIndex = 0;
+
   @override
   initState() {
     setState(() {

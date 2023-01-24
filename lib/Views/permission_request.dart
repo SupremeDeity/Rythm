@@ -1,7 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:rythm/Data/database.dart';
+import 'package:rythm/Data/Settings.dart';
 import 'package:rythm/providers/local_folder_provider.dart';
 
 class PermissionRequest extends ConsumerStatefulWidget {
@@ -15,8 +16,12 @@ class _PermissionRequestState extends ConsumerState<PermissionRequest> {
   requestPerm() async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
-      var settingsBox = await Hive.openBox("settingsBox");
-      settingsBox.put("localLibraryPath", selectedDirectory);
+      await isarDB.writeTxn(() async {
+        await isarDB.settings.put(Settings()
+          ..id = 0
+          ..localLibraryPath = selectedDirectory);
+      });
+
       ref.read(localFolderProvider.notifier).set(selectedDirectory);
     }
   }
