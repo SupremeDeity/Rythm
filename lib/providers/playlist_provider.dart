@@ -53,7 +53,7 @@ class PlaylistsNotifier extends Notifier<List<Playlist>> {
         newList.add(stPlaylist);
       }
     }
-    state = newList;
+    state = [...newList];
 
     await isarDB.writeTxn(() async {
       await isarDB.playlists

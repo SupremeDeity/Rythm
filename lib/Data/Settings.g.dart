@@ -21,6 +21,16 @@ const SettingsSchema = CollectionSchema(
       id: 0,
       name: r'localLibraryPath',
       type: IsarType.string,
+    ),
+    r'themeMode': PropertySchema(
+      id: 1,
+      name: r'themeMode',
+      type: IsarType.string,
+    ),
+    r'useMaterial3': PropertySchema(
+      id: 2,
+      name: r'useMaterial3',
+      type: IsarType.bool,
     )
   },
   estimateSize: _settingsEstimateSize,
@@ -49,6 +59,7 @@ int _settingsEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.themeMode.length * 3;
   return bytesCount;
 }
 
@@ -59,6 +70,8 @@ void _settingsSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.localLibraryPath);
+  writer.writeString(offsets[1], object.themeMode);
+  writer.writeBool(offsets[2], object.useMaterial3);
 }
 
 Settings _settingsDeserialize(
@@ -70,6 +83,8 @@ Settings _settingsDeserialize(
   final object = Settings();
   object.id = id;
   object.localLibraryPath = reader.readStringOrNull(offsets[0]);
+  object.themeMode = reader.readString(offsets[1]);
+  object.useMaterial3 = reader.readBool(offsets[2]);
   return object;
 }
 
@@ -82,6 +97,10 @@ P _settingsDeserializeProp<P>(
   switch (propertyId) {
     case 0:
       return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -381,6 +400,147 @@ extension SettingsQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'themeMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'themeMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> themeModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition>
+      themeModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> useMaterial3EqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'useMaterial3',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension SettingsQueryObject
@@ -399,6 +559,30 @@ extension SettingsQuerySortBy on QueryBuilder<Settings, Settings, QSortBy> {
   QueryBuilder<Settings, Settings, QAfterSortBy> sortByLocalLibraryPathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'localLibraryPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByUseMaterial3() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useMaterial3', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByUseMaterial3Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useMaterial3', Sort.desc);
     });
   }
 }
@@ -428,6 +612,30 @@ extension SettingsQuerySortThenBy
       return query.addSortBy(r'localLibraryPath', Sort.desc);
     });
   }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByUseMaterial3() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useMaterial3', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByUseMaterial3Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useMaterial3', Sort.desc);
+    });
+  }
 }
 
 extension SettingsQueryWhereDistinct
@@ -437,6 +645,19 @@ extension SettingsQueryWhereDistinct
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'localLibraryPath',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QDistinct> distinctByThemeMode(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QDistinct> distinctByUseMaterial3() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'useMaterial3');
     });
   }
 }
@@ -452,6 +673,18 @@ extension SettingsQueryProperty
   QueryBuilder<Settings, String?, QQueryOperations> localLibraryPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'localLibraryPath');
+    });
+  }
+
+  QueryBuilder<Settings, String, QQueryOperations> themeModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'themeMode');
+    });
+  }
+
+  QueryBuilder<Settings, bool, QQueryOperations> useMaterial3Property() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'useMaterial3');
     });
   }
 }

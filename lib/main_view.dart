@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Views/browse.dart';
 import 'package:rythm/Views/playlists_view.dart';
+import 'package:rythm/Views/settings_view.dart';
 import 'package:rythm/Widgets/now_playing_sheet.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -18,9 +19,9 @@ class MainView extends ConsumerStatefulWidget {
 class _MainViewState extends ConsumerState<MainView> {
   bool playing = false;
   var routes = [
-    Browse(),
+    const Browse(),
     PlaylistBrowse(null),
-    Browse(),
+    const SettingsView(),
   ];
 
   var _currentIndex = 0;
@@ -41,24 +42,34 @@ class _MainViewState extends ConsumerState<MainView> {
       body: IndexedStack(index: _currentIndex, children: routes),
       bottomSheet: song.filePath != null ? NowPlayingSheet() : null,
       bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: FaIcon(
               FontAwesomeIcons.list,
               size: 20,
             ),
+            activeIcon: FaIcon(
+              FontAwesomeIcons.listOl,
+              size: 20,
+            ),
             label: "Browse",
           ),
           BottomNavigationBarItem(
-              icon: FaIcon(
-                FontAwesomeIcons.music,
-                size: 20,
+              icon: Icon(
+                Icons.music_note_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.music_note,
               ),
               label: "Playlist"),
           BottomNavigationBarItem(
-              icon: FaIcon(
-                FontAwesomeIcons.gear,
-                size: 20,
+              icon: Icon(
+                Icons.settings_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.settings,
               ),
               label: "Settings")
         ],

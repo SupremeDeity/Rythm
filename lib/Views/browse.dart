@@ -9,7 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rythm/Data/Playlist.dart';
-import 'package:rythm/providers/local_folder_provider.dart';
+import 'package:rythm/providers/settings_provider.dart';
 import 'package:rythm/providers/player_provider.dart';
 
 class Browse extends ConsumerStatefulWidget {
@@ -57,9 +57,9 @@ class _BrowseState extends ConsumerState<Browse> {
 
   Stream<List<ListTile>> generateTiles() async* {
     List<ListTile> listViews = <ListTile>[];
-    var localFolderPath = ref.read(localFolderProvider);
-    currentPath ??= localFolderPath;
-    if (currentPath != localFolderPath) {
+    var settings = ref.read(settingsProvider);
+    currentPath ??= settings!.localLibraryPath;
+    if (currentPath != settings!.localLibraryPath) {
       listViews.add(ListTile(
         title: const Text("Back"),
         leading: const Icon(Icons.subdirectory_arrow_left_sharp),
@@ -150,12 +150,12 @@ class _BrowseState extends ConsumerState<Browse> {
 
   @override
   Widget build(BuildContext context) {
-    var localFolderPath = ref.watch(localFolderProvider);
+    var settings = ref.watch(settingsProvider);
     return Scaffold(
       appBar: appBar(context),
       body: WillPopScope(
         onWillPop: () {
-          if (currentPath != localFolderPath) {
+          if (currentPath != settings!.localLibraryPath) {
             Directory d = Directory(currentPath!);
             changeView(path: d.parent.path);
             return Future.value(false);

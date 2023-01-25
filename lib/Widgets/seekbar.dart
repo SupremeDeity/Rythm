@@ -13,6 +13,7 @@ class Seekbar extends ConsumerStatefulWidget {
 }
 
 class _SeekbarState extends ConsumerState<Seekbar> {
+  double value = 0.0;
   @override
   Widget build(BuildContext context) {
     AudioPlayer player = ref.read(playerProvider);
@@ -24,13 +25,27 @@ class _SeekbarState extends ConsumerState<Seekbar> {
             children: [
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                    thumbColor: Theme.of(context).colorScheme.secondary,
-                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6)),
+                  inactiveTrackColor: Theme.of(context).colorScheme.secondary,
+                  thumbColor: Theme.of(context).colorScheme.secondary,
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  showValueIndicator: ShowValueIndicator.always,
+                ),
                 child: Slider(
+                  label: Duration(
+                          milliseconds:
+                              (value * (player.duration?.inMilliseconds ?? 1))
+                                  .ceil())
+                      .toString()
+                      .split(".")[0],
                   value: ((snapshot.data?.inMilliseconds ?? 1) /
                           (player.duration?.inMilliseconds ?? 1))
                       .clamp(0, 1),
-                  onChanged: (value) {},
+                  onChanged: (val) {
+                    setState(() {
+                      value = val;
+                    });
+                  },
                   onChangeEnd: (value) {
                     player.seek(Duration(
                         milliseconds:

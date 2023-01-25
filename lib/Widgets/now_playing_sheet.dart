@@ -27,7 +27,7 @@ class _NowPlayingSheetState extends ConsumerState<NowPlayingSheet> {
       ),
       dense: true,
       isThreeLine: true,
-      tileColor: Theme.of(context).colorScheme.secondaryContainer,
+      tileColor: Theme.of(context).colorScheme.primaryContainer,
       leading: songMetadata.artwork != null
           ? Image.memory(
               songMetadata.artwork! as Uint8List,
