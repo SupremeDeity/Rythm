@@ -41,7 +41,7 @@ class _PermissionRequestState extends ConsumerState<PermissionRequest> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
-          ElevatedButton(
+          FilledButton(
               onPressed: () => requestPerm(),
               child: const Text("Select folder"))
         ],
