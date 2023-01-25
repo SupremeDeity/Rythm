@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Views/browse.dart';
 import 'package:rythm/Views/playlists_view.dart';
+import 'package:rythm/Views/settings_view.dart';
 import 'package:rythm/Widgets/now_playing_sheet.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -20,7 +21,7 @@ class _MainViewState extends ConsumerState<MainView> {
   var routes = [
     const Browse(),
     PlaylistBrowse(null),
-    const Browse(),
+    const SettingsView(),
   ];
 
   var _currentIndex = 0;
