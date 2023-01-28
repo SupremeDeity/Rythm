@@ -48,7 +48,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           ),
         ),
         ListTile(
-          title: Text("Use Material 3"),
+          title: const Text("Use Material 3"),
           trailing: Switch(
             thumbIcon: MaterialStateProperty.resolveWith((states) {
               if (states.contains(MaterialState.selected)) {
@@ -58,7 +58,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 );
               }
 
-              return Icon(Icons.close_rounded);
+              return const Icon(Icons.close_rounded);
             }),
             value: settings?.useMaterial3 ?? true,
             onChanged: (value) {

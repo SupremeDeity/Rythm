@@ -13,6 +13,7 @@ import 'package:rythm/providers/playlist_provider.dart';
 import 'package:rythm/providers/settings_provider.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await JustAudioBackground.init(
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,

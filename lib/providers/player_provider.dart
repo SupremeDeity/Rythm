@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rythm/Data/Playlist.dart';
@@ -18,7 +17,12 @@ final songProvider = NotifierProvider<SongNotifier, Song>(() {
   return SongNotifier();
 });
 
-final playerProvider = Provider<AudioPlayer>((ref) {
-  AudioPlayer player = AudioPlayer();
-  return player;
-});
+class PlayerNotifier extends Notifier<AudioPlayer> {
+  @override
+  AudioPlayer build() {
+    return AudioPlayer();
+  }
+}
+
+final playerProvider =
+    NotifierProvider<PlayerNotifier, AudioPlayer>(PlayerNotifier.new);

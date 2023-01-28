@@ -61,6 +61,31 @@ class PlaylistsNotifier extends Notifier<List<Playlist>> {
     });
   }
 
+  /// Removes song from playlist.
+  ///
+  /// NOTE: MODIFIES ISAR DB
+  removeSong(Playlist playlist, Song song) async {
+    Playlist newPlaylist = Playlist()
+      ..id = playlist.id
+      ..name = playlist.name
+      ..songs = List.from(playlist.songs);
+    newPlaylist.songs.remove(song);
+    List<Playlist> newList = [];
+    for (var stPlaylist in state) {
+      if (playlist.id == stPlaylist.id) {
+        newList.add(newPlaylist);
+      } else {
+        newList.add(stPlaylist);
+      }
+    }
+    state = [...newList];
+
+    await isarDB.writeTxn(() async {
+      await isarDB.playlists
+          .put(state.firstWhere((element) => element.id == playlist.id));
+    });
+  }
+
   @override
   List<Playlist> build() {
     return [];
@@ -68,6 +93,4 @@ class PlaylistsNotifier extends Notifier<List<Playlist>> {
 }
 
 final playlistsProvider =
-    NotifierProvider<PlaylistsNotifier, List<Playlist>>(() {
-  return PlaylistsNotifier();
-});
+    NotifierProvider<PlaylistsNotifier, List<Playlist>>(PlaylistsNotifier.new);

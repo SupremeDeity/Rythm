@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Views/now_playing.dart';
+import 'package:rythm/Widgets/player_common_utils.dart';
 import 'package:rythm/providers/player_provider.dart';
 
 class NowPlayingSheet extends ConsumerStatefulWidget {
@@ -30,7 +29,7 @@ class _NowPlayingSheetState extends ConsumerState<NowPlayingSheet> {
       tileColor: Theme.of(context).colorScheme.primaryContainer,
       leading: songMetadata.artwork != null
           ? Image.memory(
-              songMetadata.artwork! as Uint8List,
+              songMetadata.artwork!,
               fit: BoxFit.fill,
             )
           : const Icon(Icons.music_note),
@@ -65,38 +64,21 @@ class _NowPlayingSheetState extends ConsumerState<NowPlayingSheet> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-              onPressed: () {
-                if (player.playing) {
-                  player.pause();
-                } else {
-                  player.play();
-                }
-              },
-              icon: StreamBuilder<PlayerState>(
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    switch (snapshot.data!.processingState) {
-                      case ProcessingState.loading:
-                      case ProcessingState.buffering:
-                        return const CircularProgressIndicator();
-                      case ProcessingState.ready:
-                        if (snapshot.data!.playing) {
-                          return const FaIcon(FontAwesomeIcons.pause);
-                        }
-                        return const FaIcon(FontAwesomeIcons.play);
-                      case ProcessingState.idle:
-                      case ProcessingState.completed:
-                        return const FaIcon(FontAwesomeIcons.play);
-                      default:
-                        return const FaIcon(FontAwesomeIcons.play);
-                    }
-                  }
-                  return const FaIcon(FontAwesomeIcons.play);
-                },
-                initialData: player.playerState,
-                stream: player.playerStateStream,
-              )),
+          StreamBuilder<PlayerState>(
+              stream: player.playerStateStream,
+              initialData: player.playerState,
+              builder: (context, snapshot) {
+                return IconButton(
+                    iconSize: 32,
+                    onPressed: () {
+                      changePlayState(snapshot, player);
+                    },
+                    icon: snapshot.hasData
+                        ? playButtonIcon(snapshot)
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          ));
+              }),
         ],
       ),
     );
