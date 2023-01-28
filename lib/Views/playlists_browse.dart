@@ -97,6 +97,7 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(playlists[index].name!),
+                    subtitle: Text("${playlists[index].songs.length} songs"),
                     leading: const Icon(Icons.album),
                     onTap: () {
                       setState(() {

@@ -77,6 +77,9 @@ class _BrowseState extends ConsumerState<Browse> {
         var ext = entity.path.split("/").last.split(".").last;
         if (allowedExtensions.contains(ext)) {
           Uint8List? artwork = await tagger.readArtwork(path: entity.path);
+          // ? Not using future builder to avoid working too much on main thread
+          // ? Also saves from the hassle of refreshing and caching artwork.
+          // ? Maybe revamp this in the future?
           listViews.add(MusicView(entity, artwork: artwork));
         }
       } else if (entity is Directory &&
@@ -100,25 +103,7 @@ class _BrowseState extends ConsumerState<Browse> {
       ..lyrics = tags?.lyrics
       ..filePath = path
       ..artwork = artwork;
-    ref.read(queueProvider.notifier).setQueue([song]);
-
-    // var artworkTempFolder = File("${(await getTemporaryDirectory()).path}");
-    // if (await artworkTempFolder.exists()) {
-    //   await artworkTempFolder.delete();
-    // }
-    // File? artworkTemp = artwork != null
-    //     ? await File(
-    //             "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
-    //         .writeAsBytes(artwork, flush: true)
-    //     : null;
-    // player.setAudioSource(AudioSource.uri(
-    //   Uri.file(path),
-    //   tag: MediaItem(
-    //     id: path,
-    //     title: songTitle,
-    //     artUri: artworkTemp?.uri,
-    //   ),
-    // ));
+    await ref.read(queueProvider.notifier).setQueue([song]);
 
     await player.play();
   }

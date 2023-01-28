@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -276,7 +275,7 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (playlists.isEmpty)
-                                        Text(
+                                        const Text(
                                             "No playlists created, create one to add the song to a playlist."),
                                       ListView.builder(
                                         shrinkWrap: true,
