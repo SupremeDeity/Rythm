@@ -6,9 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:rythm/Data/Playlist.dart';
+import 'package:rythm/providers/queue_provider.dart';
 import 'package:rythm/providers/settings_provider.dart';
 import 'package:rythm/providers/player_provider.dart';
 
@@ -90,37 +89,38 @@ class _BrowseState extends ConsumerState<Browse> {
 
   playMusic(var path, Uint8List? artwork) async {
     AudioPlayer player = ref.read(playerProvider);
-    var artworkTempFolder = File("${(await getTemporaryDirectory()).path}");
-    if (await artworkTempFolder.exists()) {
-      await artworkTempFolder.delete();
-    }
 
     var tags = await tagger.readTags(path: path);
     var songTitle = tags?.title != null && tags?.title != ""
         ? tags?.title
         : path?.split("/").last.split(".").first;
 
-    ref.read(songProvider.notifier).setSong(
-          Song()
-            ..title = songTitle
-            ..lyrics = tags?.lyrics
-            ..filePath = path
-            ..artwork = artwork,
-        );
-    File? artworkTemp = artwork != null
-        ? await File(
-                "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
-            .writeAsBytes(artwork, flush: true)
-        : null;
-    player.setAudioSource(AudioSource.uri(
-      Uri.file(path),
-      tag: MediaItem(
-        id: path,
-        title: songTitle,
-        artUri: artworkTemp?.uri,
-      ),
-    ));
-    player.play();
+    Song song = Song()
+      ..title = songTitle
+      ..lyrics = tags?.lyrics
+      ..filePath = path
+      ..artwork = artwork;
+    ref.read(queueProvider.notifier).setQueue([song]);
+
+    // var artworkTempFolder = File("${(await getTemporaryDirectory()).path}");
+    // if (await artworkTempFolder.exists()) {
+    //   await artworkTempFolder.delete();
+    // }
+    // File? artworkTemp = artwork != null
+    //     ? await File(
+    //             "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
+    //         .writeAsBytes(artwork, flush: true)
+    //     : null;
+    // player.setAudioSource(AudioSource.uri(
+    //   Uri.file(path),
+    //   tag: MediaItem(
+    //     id: path,
+    //     title: songTitle,
+    //     artUri: artworkTemp?.uri,
+    //   ),
+    // ));
+
+    await player.play();
   }
 
   // Navigate
@@ -188,7 +188,7 @@ class _BrowseState extends ConsumerState<Browse> {
               child: CircularProgressIndicator(),
             );
           },
-          initialData: [],
+          initialData: const [],
         ),
       ),
     );

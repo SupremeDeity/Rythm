@@ -1,10 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:isar/isar.dart';
 import 'package:rythm/Data/database.dart';
 import 'package:rythm/Data/Settings.dart';
-import 'package:rythm/providers/settings_provider.dart';
 
 class PermissionRequest extends ConsumerStatefulWidget {
   const PermissionRequest({Key? key}) : super(key: key);
@@ -16,7 +14,6 @@ class PermissionRequest extends ConsumerStatefulWidget {
 class _PermissionRequestState extends ConsumerState<PermissionRequest> {
   requestPerm() async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-    Settings? settings = await isarDB.settings.get(0);
     if (selectedDirectory != null) {
       Settings newSettings = Settings()..localLibraryPath = selectedDirectory;
       await isarDB.writeTxn(() async {

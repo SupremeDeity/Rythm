@@ -68,6 +68,4 @@ class PlaylistsNotifier extends Notifier<List<Playlist>> {
 }
 
 final playlistsProvider =
-    NotifierProvider<PlaylistsNotifier, List<Playlist>>(() {
-  return PlaylistsNotifier();
-});
+    NotifierProvider<PlaylistsNotifier, List<Playlist>>(PlaylistsNotifier.new);

@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rythm/Data/Playlist.dart';
+import 'package:rythm/Widgets/player_common_utils.dart';
 import 'package:rythm/Widgets/seekbar.dart';
 import 'package:rythm/providers/player_provider.dart';
 import 'package:rythm/providers/playlist_provider.dart';
+import 'package:rythm/providers/queue_provider.dart';
 
 class NowPlaying extends ConsumerStatefulWidget {
   const NowPlaying({Key? key}) : super(key: key);
@@ -19,6 +20,18 @@ class NowPlaying extends ConsumerStatefulWidget {
 }
 
 class _NowPlayingState extends ConsumerState<NowPlaying> {
+  int currentIndex = 0;
+  late AudioPlayer player;
+
+  @override
+  initState() {
+    setState(() {
+      player = ref.read(playerProvider);
+    });
+
+    super.initState();
+  }
+
   dialogPlaylists() {
     return IconButton(
         onPressed: () {
@@ -66,11 +79,19 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
         ));
   }
 
+  seekNext() async {
+    await player.seekToNext();
+  }
+
+  seekPrev() async {
+    await player.seekToPrevious();
+  }
+
   @override
   Widget build(BuildContext context) {
-    AudioPlayer player = ref.read(playerProvider);
     Song song = ref.watch(songProvider);
     List<Playlist> playlists = ref.watch(playlistsProvider);
+    List<Song> queue = ref.watch(queueProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -138,89 +159,72 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
             ),
             Row(
               children: [
-                Expanded(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       IconButton(
-                          tooltip: "Seek previous",
-                          onPressed: player.hasPrevious
-                              ? () {
-                                  player.seekToPrevious();
-                                }
+                        tooltip: "Shuffle",
+                        onPressed: setShuffleMode,
+                        icon: FaIcon(
+                          FontAwesomeIcons.shuffle,
+                          color: player.shuffleModeEnabled
+                              ? Theme.of(context).colorScheme.primary
                               : null,
-                          icon: const FaIcon(FontAwesomeIcons.backwardStep)),
-                      FilledButton(
-                          style: ButtonStyle(
-                              padding: const MaterialStatePropertyAll(
-                                  EdgeInsets.all(4)),
-                              shape: const MaterialStatePropertyAll(
-                                  CircleBorder()),
-                              iconSize: const MaterialStatePropertyAll(42),
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Theme.of(context).colorScheme.primary)),
-                          // padding: EdgeInsets.all(16),
-                          // tooltip: "Play/Pause",
-                          onPressed: () {
-                            if (player.playing) {
-                              player.pause();
-                            } else {
-                              player.play();
-                            }
-                          },
-                          child: StreamBuilder<PlayerState>(
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                switch (snapshot.data!.processingState) {
-                                  case ProcessingState.loading:
-                                  case ProcessingState.buffering:
-                                    return const CircularProgressIndicator();
-                                  case ProcessingState.ready:
-                                    if (snapshot.data!.playing) {
-                                      return const Icon(Icons.pause_rounded);
-                                    }
-                                    return const Icon(Icons.play_arrow_rounded);
-                                  case ProcessingState.idle:
-                                  case ProcessingState.completed:
-                                    return const FaIcon(FontAwesomeIcons.play);
-                                  default:
-                                    return const FaIcon(FontAwesomeIcons.play);
-                                }
-                              }
-                              return const FaIcon(FontAwesomeIcons.play);
-                            },
-                            initialData: player.playerState,
-                            stream: player.playerStateStream,
-                          )),
-                      IconButton(
-                          tooltip: "Seek next",
-                          onPressed: player.hasNext
-                              ? () {
-                                  player.seekToNext();
-                                }
-                              : null,
-                          icon: const FaIcon(FontAwesomeIcons.forwardStep)),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                const Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     IconButton(
+                        tooltip: "Seek previous",
+                        onPressed: player.hasPrevious
+                            ? () {
+                                seekPrev();
+                              }
+                            : null,
+                        icon: const FaIcon(FontAwesomeIcons.backwardStep)),
+                    StreamBuilder<PlayerState>(
+                        stream: player.playerStateStream,
+                        initialData: player.playerState,
+                        builder: (context, snapshot) {
+                          return FilledButton(
+                              style: ButtonStyle(
+                                  padding: const MaterialStatePropertyAll(
+                                      EdgeInsets.all(4)),
+                                  shape: const MaterialStatePropertyAll(
+                                      CircleBorder()),
+                                  iconSize: const MaterialStatePropertyAll(42),
+                                  backgroundColor: MaterialStatePropertyAll(
+                                      Theme.of(context).colorScheme.primary)),
+                              onPressed: () =>
+                                  changePlayState(snapshot, player),
+                              child: snapshot.hasData
+                                  ? playButtonIcon(snapshot)
+                                  : const Center(
+                                      child: CircularProgressIndicator(),
+                                    ));
+                        }),
+                    IconButton(
+                        tooltip: "Seek next",
+                        onPressed: player.hasNext
+                            ? () {
+                                seekNext();
+                              }
+                            : null,
+                        icon: const FaIcon(FontAwesomeIcons.forwardStep)),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    IconButton(
                         tooltip: "Loop mode",
-                        onPressed: () {
-                          switch (player.loopMode) {
-                            case LoopMode.off:
-                              player.setLoopMode(LoopMode.one);
-                              break;
-                            case LoopMode.one:
-                              player.setLoopMode(LoopMode.all);
-                              break;
-                            case LoopMode.all:
-                              player.setLoopMode(LoopMode.off);
-                              break;
-                          }
-                        },
+                        onPressed: changeLoopMode,
                         icon: StreamBuilder<LoopMode>(
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
@@ -310,5 +314,24 @@ class _NowPlayingState extends ConsumerState<NowPlaying> {
         ),
       ]),
     );
+  }
+
+  void changeLoopMode() async {
+    switch (player.loopMode) {
+      case LoopMode.off:
+        await player.setLoopMode(LoopMode.one);
+        break;
+      case LoopMode.one:
+        await player.setLoopMode(LoopMode.all);
+        break;
+      case LoopMode.all:
+        await player.setLoopMode(LoopMode.off);
+        break;
+    }
+  }
+
+  void setShuffleMode() async {
+    await player.setShuffleModeEnabled(!player.shuffleModeEnabled);
+    setState(() {}); // cause update
   }
 }

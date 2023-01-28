@@ -1,0 +1,38 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:rythm/Data/Playlist.dart';
+import 'package:rythm/providers/player_provider.dart';
+
+class QueueNotifier extends Notifier<List<Song>> {
+  /// [setQueue] creates a [ConcatenatingAudioSource] *only* when [songs]
+  /// length > 1 to not cause issues with player.
+  ///
+  /// `shuffleByDefault` is set to true only when playing an entire playlist,
+  /// to not cause issue when the queue starts from playlist browser.
+  setQueue(List<Song> songs, {bool shuffleByDefault = false}) async {
+    var player = ref.read(playerProvider);
+
+    var cas = songs.length > 1
+        ? ConcatenatingAudioSource(children: [
+            for (Song song in songs) AudioSource.file(song.filePath!)
+          ])
+        : AudioSource.file(songs.first.filePath!);
+    await player.setAudioSource(cas);
+    await player.setShuffleModeEnabled(shuffleByDefault);
+    ref.read(songProvider.notifier).setSong(songs[0]);
+    state = [...songs];
+  }
+
+  setQueueIndex(int index) {
+    ref.read(songProvider.notifier).setSong(state[index]);
+    state = [...state];
+  }
+
+  @override
+  List<Song> build() {
+    return [];
+  }
+}
+
+final queueProvider =
+    NotifierProvider<QueueNotifier, List<Song>>(QueueNotifier.new);

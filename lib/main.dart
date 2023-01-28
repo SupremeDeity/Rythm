@@ -2,7 +2,6 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 
 import 'package:rythm/Data/Playlist.dart';
 import 'package:rythm/Data/Settings.dart';
@@ -13,10 +12,11 @@ import 'package:rythm/providers/playlist_provider.dart';
 import 'package:rythm/providers/settings_provider.dart';
 
 Future<void> main() async {
-  await JustAudioBackground.init(
-    androidNotificationChannelName: 'Audio playback',
-    androidNotificationOngoing: true,
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+  // await JustAudioBackground.init(
+  //   androidNotificationChannelName: 'Audio playback',
+  //   androidNotificationOngoing: true,
+  // );
   await getIsar();
   // ignore: prefer_const_constructors
   runApp(ProviderScope(child: Rythm()));
