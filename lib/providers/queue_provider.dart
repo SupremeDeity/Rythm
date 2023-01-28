@@ -39,10 +39,11 @@ class QueueNotifier extends Notifier<List<Song>> {
         ? ConcatenatingAudioSource(children: queue)
         : queue.first;
 
+    await player.setShuffleModeEnabled(shuffleByDefault);
     await player.setAudioSource(cas);
 
-    await player.setShuffleModeEnabled(shuffleByDefault);
-    ref.read(songProvider.notifier).setSong(songs[0]);
+    ref.read(songProvider.notifier).setSong(songs[player.currentIndex ?? 0]);
+
     state = [...songs];
   }
 

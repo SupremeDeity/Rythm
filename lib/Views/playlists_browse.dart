@@ -93,9 +93,15 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
               : [
                   IconButton(
                       onPressed: () {
+                        playPlaylistAction(playlists, currentPlaylistIndex!,
+                            shuffle: true);
+                      },
+                      icon: const FaIcon(FontAwesomeIcons.shuffle)),
+                  IconButton(
+                      onPressed: () {
                         playPlaylistAction(playlists, currentPlaylistIndex!);
                       },
-                      icon: FaIcon(FontAwesomeIcons.play))
+                      icon: const FaIcon(FontAwesomeIcons.play))
                 ],
         ),
         body: currentPlaylistIndex == null
@@ -124,6 +130,15 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
                                   leading: const FaIcon(FontAwesomeIcons.play),
                                   onTap: () {
                                     playPlaylistAction(playlists, index);
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text("Play playlist (Shuffle)"),
+                                  leading: const Icon(Icons.shuffle_on_rounded),
+                                  onTap: () {
+                                    playPlaylistAction(playlists, index,
+                                        shuffle: true);
                                     Navigator.of(context).pop();
                                   },
                                 ),
@@ -158,10 +173,13 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
     );
   }
 
-  void playPlaylistAction(List<Playlist> playlists, int index) async {
+  void playPlaylistAction(List<Playlist> playlists, int index,
+      {bool shuffle = false}) async {
     AudioPlayer player = ref.read(playerProvider);
 
-    ref.read(queueProvider.notifier).setQueue(playlists[index].songs);
+    ref
+        .read(queueProvider.notifier)
+        .setQueue(playlists[index].songs, shuffleByDefault: shuffle);
 
     await player.play();
   }
