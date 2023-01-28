@@ -90,7 +90,13 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
                       },
                       icon: const FaIcon(FontAwesomeIcons.plus))
                 ]
-              : null,
+              : [
+                  IconButton(
+                      onPressed: () {
+                        playPlaylistAction(playlists, currentPlaylistIndex!);
+                      },
+                      icon: FaIcon(FontAwesomeIcons.play))
+                ],
         ),
         body: currentPlaylistIndex == null
             ? ListView.builder(
@@ -114,6 +120,14 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
                               shrinkWrap: true,
                               children: [
                                 ListTile(
+                                  title: const Text("Play playlist"),
+                                  leading: const FaIcon(FontAwesomeIcons.play),
+                                  onTap: () {
+                                    playPlaylistAction(playlists, index);
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                ListTile(
                                   title: const Text(
                                       "Delete playlist (Hold to confirm)"),
                                   leading: const FaIcon(FontAwesomeIcons.trash),
@@ -125,7 +139,7 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
                                     ref
                                         .read(playlistsProvider.notifier)
                                         .removePlaylist(playlists[index].id);
-                                    ;
+
                                     Navigator.of(context).pop();
                                   },
                                 )
@@ -142,6 +156,14 @@ class _PlaylistsBrowseState extends ConsumerState<PlaylistsBrowse> {
             : PlaylistView(currentPlaylistIndex!),
       ),
     );
+  }
+
+  void playPlaylistAction(List<Playlist> playlists, int index) async {
+    AudioPlayer player = ref.read(playerProvider);
+
+    ref.read(queueProvider.notifier).setQueue(playlists[index].songs);
+
+    await player.play();
   }
 }
 
@@ -191,6 +213,35 @@ class _PlaylistViewState extends ConsumerState<PlaylistView> {
               fit: BoxFit.contain,
             ),
       onTap: () => playMusic(index),
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Playlist actions"),
+              content: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: const Text(
+                        "Remove song from playlist (Hold to confirm)"),
+                    leading: const FaIcon(FontAwesomeIcons.trash),
+                    iconColor: Theme.of(context).colorScheme.error,
+                    textColor: Theme.of(context).colorScheme.error,
+                    onLongPress: () {
+                      ref.read(playlistsProvider.notifier).removeSong(
+                          ref.read(playlistsProvider)[widget.playlistIndex],
+                          song);
+
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -206,27 +257,6 @@ class _PlaylistViewState extends ConsumerState<PlaylistView> {
     List<Song> songsToQueue = currentPlaylist.songs.sublist(index);
 
     ref.read(queueProvider.notifier).setQueue(songsToQueue);
-
-    // var artworkTempFolder = File("${(await getTemporaryDirectory()).path}");
-    // if (await artworkTempFolder.exists()) {
-    //   await artworkTempFolder.delete();
-    // }
-
-    // ref.read(songProvider.notifier).setSong(song);
-
-    // File? artworkTemp = song.artwork != null
-    //     ? await File(
-    //             "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
-    //         .writeAsBytes(song.artwork!, flush: true)
-    //     : null;
-    // player.setAudioSource(AudioSource.uri(
-    //   Uri.file(song.filePath!),
-    //   tag: MediaItem(
-    //     id: song.filePath!,
-    //     title: song.title ?? "",
-    //     artUri: artworkTemp?.uri,
-    //   ),
-    // ));
 
     await player.play();
   }

@@ -27,6 +27,7 @@ class QueueNotifier extends Notifier<List<Song>> {
                   "${artworkTempFolder.path}/${DateTime.now().microsecondsSinceEpoch}")
               .writeAsBytes(song.artwork!)
           : null;
+
       queue.add(AudioSource.uri(Uri.file(song.filePath!),
           tag: MediaItem(
               id: song.filePath!,
