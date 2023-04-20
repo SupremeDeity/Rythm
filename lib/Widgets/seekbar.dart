@@ -25,7 +25,7 @@ class _SeekbarState extends ConsumerState<Seekbar> {
             children: [
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  inactiveTrackColor: Theme.of(context).colorScheme.secondary,
+                  inactiveTrackColor: Theme.of(context).colorScheme.tertiary,
                   thumbColor: Theme.of(context).colorScheme.secondary,
                   thumbShape:
                       const RoundSliderThumbShape(enabledThumbRadius: 6),

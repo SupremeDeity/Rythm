@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
 
 Widget playButtonIcon(AsyncSnapshot<PlayerState> snapshot) {
@@ -8,14 +9,14 @@ Widget playButtonIcon(AsyncSnapshot<PlayerState> snapshot) {
       return const CircularProgressIndicator();
     case ProcessingState.ready:
       if (snapshot.data!.playing) {
-        return const Icon(Icons.pause_rounded);
+        return const FaIcon(FontAwesomeIcons.pause);
       }
-      return const Icon(Icons.play_arrow_rounded);
+      return const FaIcon(FontAwesomeIcons.play);
     case ProcessingState.idle:
     case ProcessingState.completed:
-      return const Icon(Icons.replay);
+      return const FaIcon(FontAwesomeIcons.arrowRotateLeft);
     default:
-      return const Icon(Icons.play_arrow_rounded);
+      return const FaIcon(FontAwesomeIcons.play);
   }
 }
 

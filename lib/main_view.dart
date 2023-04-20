@@ -31,11 +31,11 @@ class _MainViewState extends ConsumerState<MainView> {
       setState(() {
         player = ref.read(playerProvider);
         playing = player.playing;
-        indexSub = player.currentIndexStream.listen((event) {
-          if (event != null && ref.read(queueProvider).isNotEmpty) {
-            ref.read(queueProvider.notifier).setQueueIndex(event);
-          }
-        });
+      });
+      indexSub = player.currentIndexStream.listen((event) {
+        if (event != null && ref.read(queueProvider).isNotEmpty) {
+          ref.read(queueProvider.notifier).setQueueIndex(event);
+        }
       });
     }
   }
@@ -49,7 +49,7 @@ class _MainViewState extends ConsumerState<MainView> {
 
   var routes = [
     const Browse(),
-    PlaylistsBrowse(),
+    const PlaylistsBrowse(),
     const SettingsView(),
   ];
 

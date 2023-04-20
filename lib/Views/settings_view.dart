@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rythm/Data/Settings.dart';
@@ -12,15 +13,6 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsViewState extends ConsumerState<SettingsView> {
-  late List<String> themeModeOptions;
-  @override
-  void initState() {
-    super.initState();
-    themeModeOptions = [
-      for (ThemeMode mode in ThemeMode.values) mode.toString()
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     var settings = ref.watch(settingsProvider);
@@ -28,13 +20,35 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       appBar: AppBar(title: const Text("Settings")),
       body: Column(children: [
         ListTile(
+          title: const Text("Theme"),
+          trailing: DropdownButton<String>(
+            value: FlexScheme.values
+                .byName(settings?.currentTheme ?? FlexScheme.dellGenoa.name)
+                .name,
+            items: FlexScheme.values
+                .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
+                      value: e.name,
+                      child: Text(e.toString().dotTail.capitalize),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              if (settings != null) {
+                isarDB.writeTxnSync(() {
+                  isarDB.settings
+                      .putSync(settings.copyWith(newCurrentTheme: value));
+                });
+              }
+            },
+          ),
+        ),
+        ListTile(
           title: const Text("Theme Mode"),
           trailing: DropdownButton<String>(
             value: settings?.themeMode ?? "",
-            items: themeModeOptions
+            items: ThemeMode.values
                 .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(e.split("ThemeMode.")[1]),
+                      value: e.toString(),
+                      child: Text(e.toString().dotTail),
                     ))
                 .toList(),
             onChanged: (value) {

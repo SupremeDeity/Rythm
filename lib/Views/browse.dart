@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:audiotagger/audiotagger.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,6 +24,7 @@ class Browse extends ConsumerStatefulWidget {
 class _BrowseState extends ConsumerState<Browse> {
   String? currentPath;
   final tagger = Audiotagger();
+  var allowedExtensions = ["mp3", "aac", "opus", "m4a"];
 
   @override
   void initState() {
@@ -44,13 +46,15 @@ class _BrowseState extends ConsumerState<Browse> {
       leading: artwork == null
           ? const FaIcon(FontAwesomeIcons.music)
           : Image.memory(
-              artwork,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
               width: 64,
               height: 64,
-              fit: BoxFit.contain,
+              artwork,
             ),
-      title: Text(fileEntity.path.split("/").last),
+      title: Text(fileEntity.path.split("/").last.split('.').first),
       onTap: () => playMusic(fileEntity.path, artwork),
+      dense: true,
     );
   }
 
@@ -69,7 +73,6 @@ class _BrowseState extends ConsumerState<Browse> {
       ));
     }
     Directory dir = Directory(currentPath!);
-    var allowedExtensions = ["mp3"];
 
     // Use a Streambuilder for this
     await for (var entity in dir.list(followLinks: false)) {

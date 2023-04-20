@@ -43,9 +43,9 @@ class _RythmState extends ConsumerState<Rythm> {
     var settings = await isarDB.settings.get(0);
     var playlists = await isarDB.playlists.where().findAll();
 
-    String? localLibrayPath = settings?.localLibraryPath;
+    String? localLibraryPath = settings?.localLibraryPath;
 
-    if (localLibrayPath != null) {
+    if (localLibraryPath != null) {
       ref.read(settingsProvider.notifier).setSettings(settings!);
     }
     ref.read(playlistsProvider.notifier).setPlaylists(playlists);
@@ -60,10 +60,12 @@ class _RythmState extends ConsumerState<Rythm> {
     var settings = ref.watch(settingsProvider);
     return MaterialApp(
         darkTheme: FlexThemeData.dark(
-            scheme: FlexScheme.dellGenoa,
+            scheme: FlexScheme.values
+                .byName(settings?.currentTheme ?? FlexScheme.dellGenoa.name),
             useMaterial3: settings?.useMaterial3 ?? true),
         theme: FlexThemeData.light(
-            scheme: FlexScheme.dellGenoa,
+            scheme: FlexScheme.values
+                .byName(settings?.currentTheme ?? FlexScheme.dellGenoa.name),
             useMaterial3: settings?.useMaterial3 ?? true),
         themeMode: themeModeToEnum(settings?.themeMode ?? ""),
         home: testingPerms
